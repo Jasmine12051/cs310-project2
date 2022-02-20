@@ -2,7 +2,6 @@ package edu.jsu.mcis.cs310;
 
 import java.sql.*;
 import org.json.simple.*;
-import org.json.simple.parser.*;
 
 public class Database {
     
@@ -24,7 +23,34 @@ public class Database {
         
         String result = null;
         
-        // INSERT YOUR CODE HERE
+        try {
+
+            ResultSet resultset = null;        
+            PreparedStatement pstSelect = null, pstUpdate = null;
+            
+            boolean hasresults;
+            
+            String query = "SELECT * FROM section WHERE termid = ? AND subjectid = ? AND num = ?";
+            pstUpdate = connection.prepareStatement(query);
+            pstSelect = connection.prepareStatement(query);
+            
+            pstUpdate.setInt(1, termid);
+            pstUpdate.setString(2, subjectid);
+            pstUpdate.setString(3, num);
+            
+            hasresults = pstUpdate.execute();
+            
+            if ( hasresults ) {
+                resultset = pstUpdate.getResultSet();
+                result = getResultSetAsJSON(resultset);
+                
+                }
+            
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
         return result;
         
@@ -34,19 +60,59 @@ public class Database {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        try {
+            
+            PreparedStatement pstUpdate = null;
+        
+            String query;
+            query = "INSERT INTO registration (studentid, termid, crn) VALUES (?, ?, ?)";
+            pstUpdate = connection.prepareStatement(query);
+            pstUpdate.setInt(1, studentid);
+            pstUpdate.setInt(2, termid);
+            pstUpdate.setInt(3, crn);
+               
+            result = pstUpdate.executeUpdate();
+        
+        } 
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
         return result;
-        
+    
     }
+    
 
     public int drop(int studentid, int termid, int crn) {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        try{
+            PreparedStatement pstUpdate;
+            int newStudentid = studentid;
+            int newTermid = termid;
+            int newCrn = crn;
+            int updateCount;
+            String query;
         
-        return result;
+            query = "DELETE FROM registration WHERE studentid = ? AND termid = ? AND crn = ?";
+            pstUpdate = connection.prepareStatement(query);
+               pstUpdate.setInt(1, newStudentid);
+               pstUpdate.setInt(2, newTermid);
+               pstUpdate.setInt(3, newCrn);
+               
+            updateCount = pstUpdate.executeUpdate();
+            if (updateCount > 0) {
+                result = updateCount;
+            }   
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+    return result;
         
     }
     
@@ -54,7 +120,23 @@ public class Database {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        try {
+            
+            PreparedStatement pstUpdate = null;
+            
+            String query = "DELETE FROM registration WHERE studentid = ? AND termid = ?";
+            pstUpdate = connection.prepareStatement(query);
+            pstUpdate.setInt(1, studentid);
+            pstUpdate.setInt(2, termid);
+            
+            result = pstUpdate.executeUpdate();
+            
+            
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
         return result;
         
@@ -64,10 +146,41 @@ public class Database {
         
         String result = null;
         
-        // INSERT YOUR CODE HERE
+        try{
+            
+            ResultSet resultset = null;        
+            PreparedStatement pstSelect = null, pstUpdate = null;
+           
+            
+            String query;
+            
+            boolean hasresults;
+           
+            
+            query = "SELECT * FROM (registration JOIN section ON registration.crn = section.crn)WHERE studentid = ? AND section.termid = ?";
+            pstUpdate = connection.prepareStatement(query);
+            pstSelect = connection.prepareStatement(query);
+            
+            pstUpdate.setInt(1, studentid);
+            pstUpdate.setInt(2, termid);
+            
+            
+            hasresults = pstUpdate.execute();
+            
+            if ( hasresults ) {
+                resultset = pstUpdate.getResultSet();
+                result = getResultSetAsJSON(resultset);
+                
+                }
+            }
+        
+        
+        catch (Exception e) {
+            e.printStackTrace(); 
+        }
         
         return result;
-        
+       
     }
     
     public int getStudentId(String username) {
@@ -130,7 +243,7 @@ public class Database {
         
             try {
 
-                String url = "jdbc:mysql://" + a + "/jsu_sp22_v1?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=America/Chicago";
+                String url = "jdbc:mysql://" + a + "/jsu_sp22_v1?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=EXCEPTION&serverTimezone=America/Chicago";
                 // System.err.println("Connecting to " + url + " ...");
 
                 c = DriverManager.getConnection(url, u, p);

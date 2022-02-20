@@ -8,10 +8,11 @@ public class Main {
         
         Database db = new Database("cs310_p2_user", "P2!user", "localhost");
         
-        if (db.isConnected())
+        if (db.isConnected()){
             
             System.err.println("Connected Successfully!");
+        }
         
     }
-    
+
 }
